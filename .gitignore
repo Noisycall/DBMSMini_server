@@ -2,6 +2,7 @@
 ### Node template
 client
 .idea
+ms.json
 # Logs
 logs
 *.log

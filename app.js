@@ -3,15 +3,11 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mysql = require("promise-mysql");
-
+const ms = require("./ms.json");
 const usersRouter = require("./routes/users");
+console.log(ms);
 const connecter = async () => {
-  const connection = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "mysqlroot",
-    database: "dbms",
-  });
+  const connection = await mysql.createConnection(ms);
   let stuff = await connection.query("show tables");
   console.info(stuff.length);
 };
