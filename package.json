@@ -6,10 +6,12 @@
     "start": "cross-env NODE_ENV=dev nodemon app.js"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cookie-parser": "~1.4.4",
     "cross-env": "^7.0.2",
     "debug": "~2.6.9",
     "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
     "morgan": "~1.9.1",
     "mysql": "^2.18.1",
     "promise-mysql": "^4.1.3"
