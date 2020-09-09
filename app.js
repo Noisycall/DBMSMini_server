@@ -7,12 +7,12 @@ const ms = require("./ms.json");
 const bodyParser=require("body-parser");
 const fileUpload = require('express-fileupload');
 
-var obj  = {oid: 1, cid: 1, aid: 1};
+
 const usersRouter = require("./routes/users");
 console.log("hi");
-const connecter = async () => {
+/*const connecter = async () => {
   const connection = await mysql.createConnection(ms);
-  let stuff = await connection.query("insert into orders set ?", obj,function (error, results, fields) {
+  connection.query("insert into customer set ?",obj, function (error, results, fields) {
     console.log(results);
     results = JSON.parse(JSON.stringify(results));
     console.log(results);
@@ -22,7 +22,7 @@ const connecter = async () => {
 };
 
 connecter();
-
+*/
 const app = express();
 app.use(logger("dev"));
 app.use(express.json({ limit: "10mb" }));
@@ -51,19 +51,20 @@ app.get("/api/all_art", async function (req, res) {
 
 app.get("/api/spec_art", async function (req, res) {
   let conn = await mysql.createConnection(ms);
-  let query = "select aid, name, artpict from artwork where name = ?"
-  conn.query(query,req.body,
+  let query = "select aid, name, artpict from artwork where aid = ?"
+  conn.query(query, req.body.specartid,
       function (error, results, fields) {
       if(error)console.log(error);
       results = JSON.parse(JSON.stringify(results));
       res.send(results);
-      connection.end();
+      conn.end();
     }
   );
 });
 
 app.post("/api/buy_art", async function (req, res) {
   let connection = await mysql.createConnection(ms);
+  var obj = {oid: req.body.oid, cid: req.body.cid, aid: req.body.cid};
   let query = "insert into orders set ?";
   connection.query(query,obj,function (error, results, fields) {
    if(error)console.log(error);
@@ -76,6 +77,7 @@ app.post("/api/buy_art", async function (req, res) {
 
 app.post("/api/manage_art", async function (req, res) {
   let connection = await mysql.createConnection(ms);
+  var obj = {oid: req.body.oid, cid: req.body.cid, aid: req.body.cid};
   let query = "update artwork set ? = ? where ? = ?";
   connection.query(query,req.body,
     function (error, results, fields) {
@@ -91,4 +93,31 @@ app.post("/test/upload", async (req, res) => {
   let conn = await mysql.createConnection(ms);
   let query = `insert into Artwork SET ?`;
   conn.query(query, req.body);
+});
+
+app.post("/api/sign_up", async function (req, res) {
+  let connection = await mysql.createConnection(ms);
+  var obj = {name: req.body.cname, address: req.body.address};
+  let query = "insert into customer(name, address) set ?";//test this
+  connection.query(query,obj,function (error, results, fields) {
+   if(error)console.log(error);
+   res.send("Successfully Signed up");
+    //buy art   
+  }
+  );
+  connection.end();
+});
+
+app.get("/api/search_art", async function (req, res) {
+  let conn = await mysql.createConnection(ms);
+  let query = `select name from customer where name like '%${req.body.name}%'`
+  conn.query(query,
+      function (error, results, fields) {
+      if(error)console.log(error);
+      results = JSON.parse(JSON.stringify(results));
+      console.log(results);
+      res.json(results);
+      conn.end();
+    }
+  );
 });
