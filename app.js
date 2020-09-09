@@ -51,7 +51,7 @@ app.get("/api/all_art", async function (req, res) {
 
 app.get("/api/spec_art", async function (req, res) {
   let conn = await mysql.createConnection(ms);
-  let query = "select aid, name, artpict from artwork where aid = ?"
+  let query = `select aid, name, artpict from artwork where aid = ${req.body.aid}`
   conn.query(query, req.body.specartid,
       function (error, results, fields) {
       if(error)console.log(error);
@@ -77,9 +77,9 @@ app.post("/api/buy_art", async function (req, res) {
 
 app.post("/api/manage_art", async function (req, res) {
   let connection = await mysql.createConnection(ms);
-  var obj = {oid: req.body.oid, cid: req.body.cid, aid: req.body.cid};
-  let query = "update artwork set ? = ? where ? = ?";
-  connection.query(query,req.body,
+
+  let query = `update artwork set ${req.body.param} = "${req.body.val}" where aid = ${req.body.aid}`;
+  connection.query(query,
     function (error, results, fields) {
       if(error)console.log(error);
       res.send("Modifications confirmed"); 
@@ -97,10 +97,11 @@ app.post("/test/upload", async (req, res) => {
 
 app.post("/api/sign_up", async function (req, res) {
   let connection = await mysql.createConnection(ms);
-  var obj = {name: req.body.cname, address: req.body.address};
-  let query = "insert into customer(name, address) set ?";//test this
+  var obj = {cid:req.body.cid,name: req.body.name, address: req.body.address};
+  let query = "insert into customer set ?";//test this
   connection.query(query,obj,function (error, results, fields) {
    if(error)console.log(error);
+   else
    res.send("Successfully Signed up");
     //buy art   
   }
@@ -120,4 +121,18 @@ app.get("/api/search_art", async function (req, res) {
       conn.end();
     }
   );
+});
+
+app.post("/api/add_art", async function (req, res) {
+  let connection = await mysql.createConnection(ms);
+  var obj = {aid:req.body.aid,artist:req.body.artist,name:req.body.name,price:req.body.price, artpict:req.body.artpict };
+  let query = "insert into artwork set ?";//test this
+  connection.query(query,obj,function (error, results, fields) {
+   if(error)console.log(error);
+   else
+   res.send("Successfully Signed up");
+    //buy art   
+  }
+  );
+  connection.end();
 });
