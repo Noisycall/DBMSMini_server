@@ -6,7 +6,7 @@ const mysql = require("promise-mysql");
 router.post("/create", async function (req, res) {
   let body = req.body;
   console.info(req.body);
-  if (body.name && body.address) {
+  if (body.fname && body.address) {
     try {
       const conn = await mysql.createConnection(ms);
       let query = `select addUser(?,?);`;

@@ -43,12 +43,14 @@ app.get("/api/all_art", async function (req, res) {
   });
 });
 
-app.get("/api/spec_art", async function (req, res) {
+app.post("/api/spec_art", async function (req, res) {
   let conn = await mysql.createConnection(ms);
-  let query = `select aid, name, artpict from artwork where aid = ${req.body.aid}`;
-  conn.query(query, req.body.specartid, function (error, results) {
-    if (error) console.log(error);
-    res.json(results);
+  let query = `select * from Artwork where aid = ${req.body.AID}`;
+  conn.query(query, null, function (error, results) {
+    if (error) {
+      console.log(error);
+      res.status(500).json(error);
+    } else res.json(results);
     conn.end();
   });
 });
@@ -70,9 +72,10 @@ app.post("/api/buy_art", async function (req, res) {
 
 app.post("/api/manage_art", async function (req, res) {
   let connection = await mysql.createConnection(ms);
-
-  let query = `update artwork set ${req.body.param} = "${req.body.val}" where aid = ${req.body.aid}`;
-  connection.query(query, function (error, results, fields) {
+  const AID = String(req.body.AID);
+  delete req.body.AID;
+  let query = `update Artwork set ? where AID = ${AID}`;
+  connection.query(query, req.body, function (error, results, fields) {
     if (error) console.log(error);
     res.send("Modifications confirmed");
     //query for modifying shit about art
@@ -102,7 +105,7 @@ app.post("/api/sign_up", async function (req, res) {
   connection.end();
 });
 
-app.get("/api/search_art", async function (req, res) {
+app.post("/api/search_art", async function (req, res) {
   let conn = await mysql.createConnection(ms);
   let query = `select name from customer where name like '%${req.body.name}%'`;
   conn.query(query, function (error, results, fields) {
@@ -116,17 +119,13 @@ app.get("/api/search_art", async function (req, res) {
 
 app.post("/api/add_art", async function (req, res) {
   let connection = await mysql.createConnection(ms);
-  var obj = {
-    aid: req.body.aid,
-    artist: req.body.artist,
-    name: req.body.name,
-    price: req.body.price,
-    artpict: req.body.artpict,
-  };
-  let query = "insert into artwork set ?"; //test this
+  let obj = req.body;
+  let query = "insert into Artwork set ?";
   connection.query(query, obj, function (error, results, fields) {
-    if (error) console.log(error);
-    else res.send("Successfully Signed up");
+    if (error) {
+      console.log(error);
+      res.status(500).json(error);
+    } else res.sendStatus(200);
     //buy art
   });
   connection.end();
