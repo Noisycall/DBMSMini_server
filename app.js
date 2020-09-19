@@ -60,14 +60,25 @@ app.post("/api/buy_art", async function (req, res) {
   var preobj = { AID: req.body.AID, CID: req.body.CID };
   var obj = Object.values(preobj);
 
-  let query = "insert into Orders(AID,CID) value (?,?)";
-  connection.query(query, obj, function (error, results) {
-    if (error) {
-      console.error(error);
-      res.status(500).json(error).end();
-    } else res.json({ OID: results.insertId });
-    connection.end();
-  });
+  if (req.body.AID && req.body.CID) {
+    let query = "insert into Orders(AID,CID) value (?,?)";
+    connection.query(query, obj, function (error, results) {
+      if (error) {
+        console.error(error);
+        res.status(500).json(error).end();
+      } else {
+        let newQuery =
+          "select * from Orders inner join Artwork on Orders.AID=Artwork.AID where OID = ?;";
+        let val = [results.insertId];
+        connection.query(newQuery, val, (error, results) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json(error).end();
+          } else res.json(results);
+        });
+      }
+    });
+  } else res.status("400").send("AID or CID missing");
 });
 
 app.post("/api/manage_art", async function (req, res) {
@@ -129,4 +140,14 @@ app.post("/api/add_art", async function (req, res) {
     //buy art
   });
   connection.end();
+});
+
+app.post("/api/delete_art", async (req, res) => {
+  let body = req.body;
+  const conn = await mysql.createConnection(ms);
+  const query = "delete from Artwork where AID=?";
+  const val = [req.body.id];
+  await conn.query(query, val);
+  conn.end();
+  res.sendStatus(200);
 });
